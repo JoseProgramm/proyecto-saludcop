@@ -54,6 +54,10 @@ const Pacientes = DB.define('pacientes', {
   numero_personal: {
     type: Sequelize.INTEGER,
     allowNull: false,
+    unique: {
+      args: true,
+      msg: 'EL número personal ya pertence a un paciente previamente registrado',
+    },
     validate: {
       notEmpty: {
         msg: 'El número personal del paciente es requerido.',
@@ -63,6 +67,10 @@ const Pacientes = DB.define('pacientes', {
   numero_familiar: {
     type: Sequelize.INTEGER,
     allowNull: false,
+    unique: {
+      args: true,
+      msg: 'El número familiar ya pertence a un paciente previamente registrado',
+    },
     validate: {
       notEmpty: {
         msg: 'El número del familiar del paciente es requerido.',

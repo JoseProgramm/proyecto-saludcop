@@ -1,7 +1,7 @@
 {
   "name": "backend-saludcop",
   "version": "1.0.0",
-  "description": "Backend de saludcop, realizado para proyecto de sistemas",
+  "description": "Backend hospital, realizado para proyecto de sistemas",
   "main": "index.js",
   "scripts": {
     "start": "node src/main.js",
