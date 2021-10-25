@@ -134,7 +134,7 @@ const Pacientes = DB.define('pacientes', {
   fumador: {
     type: Sequelize.STRING,
     allowNull: false,
-    defaultValue: false,
+    defaultValue: 'No',
     validate: {
       notEmpty: {
         msg: 'Indicar si es fumador y frecuencia del paciente es necesario.',
@@ -144,6 +144,7 @@ const Pacientes = DB.define('pacientes', {
   alcoholico: {
     type: Sequelize.STRING,
     allowNull: false,
+    defaultValue: 'No',
     validate: {
       notEmpty: {
         msg: 'Indicar si es alcoholico y frecuencia del paciente es necesario.',
@@ -153,6 +154,7 @@ const Pacientes = DB.define('pacientes', {
   toma_cafe: {
     type: Sequelize.STRING,
     allowNull: false,
+    defaultValue: 'No',
     validate: {
       notEmpty: {
         msg: 'Indicar si es toma cafe y frecuencia del paciente es necesario.',
@@ -199,6 +201,11 @@ const Pacientes = DB.define('pacientes', {
     type: Sequelize.BOOLEAN,
     allowNull: true,
     defaultValue: false,
+  },
+  fecha_ingreso: {
+    type: Sequelize.DATE,
+    allowNull: false,
+    defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
   },
 });
 module.exports = Pacientes;

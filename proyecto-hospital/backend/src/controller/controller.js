@@ -199,7 +199,7 @@ exports.obtenerPacientesEnColaController = async (req, res) => {
   try {
     const pacientesCola = await pacientesEnCola();
     return !pacientesCola.length
-      ? res.status(404).json({
+      ? res.status(200).json({
           msg: 'No hay pacientes en cola actualmente',
           pacientesCola: [],
         })

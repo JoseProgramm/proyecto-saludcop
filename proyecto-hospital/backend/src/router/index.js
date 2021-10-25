@@ -27,6 +27,7 @@ router.get(
   cantidadPacientesEnColaController
 );
 router.get('/api/cantidad-pacientes-en-alta', cantidadPacientesAltaController);
+// router.get('/api/pacienteCola/asignar-cama');
 router.get(
   '/api/cantidad-pacientes-hospitalizados',
   cantidadPacientesHospitalizadosController
