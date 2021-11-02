@@ -451,18 +451,13 @@ export default {
           "Dar de alta paciente",
           "¿Está seguro que desea dar de alta al paciente?",
           () => {
-            alertify.success("Funcionalidad en desarrollo...");
-            // axios
-            //   .post("/api/pacientes/dar-alta", {
-            //     id: pacienteId,
-            //   })
-            //   .then((res) => {
-            //     alertify.success(res.data.message);
-            //     this.obtenerDatos();
-            //   })
-            //   .catch((err) => {
-            //     alertify.error(err.response.data.message);
-            //   });
+            const url =  `http://localhost:5000/api/paciente-alta/${pacienteId}`
+            axios.put(url).then((res) => {
+              alertify.success(res.data.msg);
+              this.obtenerPaciente();
+            }).catch((err) => {
+              alertify.error(err.response.data.msg);
+            });
           },
           () => {
           }

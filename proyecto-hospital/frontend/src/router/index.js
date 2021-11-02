@@ -12,6 +12,10 @@ const routes = [
     component: Home,
   },
   {
+    path: '*',
+    redirect: '/',
+  },
+  {
     path: '/paciente/:pacienteID',
     name: 'DetallesPaciente',
     component: DetallesPaciente,

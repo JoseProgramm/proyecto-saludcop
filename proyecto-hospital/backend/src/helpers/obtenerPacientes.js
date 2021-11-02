@@ -9,6 +9,7 @@ exports.pacientesEnCola = async () => {
         },
         dado_alta: false,
       },
+      order: [['id', 'ASC']],
     });
   } catch (error) {
     throw new Error(error.message);

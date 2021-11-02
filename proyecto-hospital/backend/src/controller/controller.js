@@ -73,7 +73,7 @@ exports.registroPacienteController = async (req, res) => {
           });
     } catch (error) {
       return res.status(500).json({
-        msg: 'Ocurrió un error registradoe al paciente. ' + error.message,
+        msg: 'Ocurrió un error registrando al paciente. ' + error.message,
       });
     }
   }
@@ -179,7 +179,7 @@ exports.obtenerPacientesAltaController = async (req, res) => {
   try {
     const pacientesEnAlta = await pacientesDadoAlta();
     return !pacientesEnAlta.length
-      ? res.status(404).json({
+      ? res.status(200).json({
           msg: 'No hay pacientes dado de alta',
           pacientesEnAlta: [],
         })
@@ -323,6 +323,71 @@ exports.eliminarPacienteController = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       msg: 'Ocurrió un error eliminando el paciente. ' + error.message,
+    });
+  }
+};
+exports.asignarCamaPacienteCola = async (req, res) => {
+  try {
+    const [camasDisponibles] = await obtenerCamasDisponibles();
+    const [pacientesEnColaDisponibles] = await pacientesEnCola();
+    if (camasDisponibles && pacientesEnColaDisponibles) {
+      const [pacienteCamaAsignada, camaAsignada] = await Promise.all([
+        Pacientes.update(
+          {
+            id_cama: camasDisponibles.id,
+          },
+          {
+            where: {
+              id: pacientesEnColaDisponibles.id,
+            },
+          }
+        ),
+        Camas.update(
+          {
+            disponible: false,
+          },
+          {
+            where: {
+              id: camasDisponibles.id,
+            },
+          }
+        ),
+      ]);
+      if (pacienteCamaAsignada && camaAsignada) {
+        return res.status(200).json({
+          msg: 'Cama asginada correctamente al paciente en cola!',
+          id_cama: camasDisponibles.id,
+        });
+      } else {
+        return res.status(500).json({
+          msg: 'Ocurrió un error asignado la cama al paciente',
+        });
+      }
+    } else {
+      res.status(200).json({
+        msg: 'No hay pacientes en cola',
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      msg: 'Ocurrió un error asignando la cama al paciente. ' + error.message,
+    });
+  }
+};
+exports.cantidadCamasDisponibles = async (req, res) => {
+  try {
+    const camasDisponibles = await Camas.count({
+      where: {
+        disponible: true,
+      },
+    });
+    res.status(200).json({
+      msg: 'Camas actuales disponibles',
+      camasDisponibles,
+    });
+  } catch (error) {
+    res.status(500).json({
+      msg: 'Ocurrió un error obteniendo las camas disponibles ' + error.message,
     });
   }
 };

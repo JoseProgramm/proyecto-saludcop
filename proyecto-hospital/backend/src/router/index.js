@@ -10,6 +10,8 @@ const {
   cantidadPacientesAltaController,
   cantidadPacientesHospitalizadosController,
   eliminarPacienteController,
+  asignarCamaPacienteCola,
+  cantidadCamasDisponibles,
 } = require('../controller/controller');
 const router = Router();
 
@@ -27,10 +29,11 @@ router.get(
   cantidadPacientesEnColaController
 );
 router.get('/api/cantidad-pacientes-en-alta', cantidadPacientesAltaController);
-// router.get('/api/pacienteCola/asignar-cama');
+router.get('/api/pacienteCola/asignar-cama', asignarCamaPacienteCola);
 router.get(
   '/api/cantidad-pacientes-hospitalizados',
   cantidadPacientesHospitalizadosController
 );
+router.get('/api/cantidad-camas-disponibles', cantidadCamasDisponibles);
 router.delete('/api/paciente-eliminar/:pacienteId', eliminarPacienteController);
 module.exports = router;

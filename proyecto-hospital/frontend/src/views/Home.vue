@@ -140,6 +140,7 @@ export default {
       buscador: "",
       pacientesHospitalizados: [],
       cantidadPacientesCama: null,
+      centidadCamasDisponibles:null,
       pacientesEnCola: null,
     };
   },
@@ -164,18 +165,13 @@ export default {
         "Dar de alta paciente",
         "¿Está seguro que desea dar de alta al paciente?",
         () => {
-          alertify.success('Funcionalidad en desarrollo...')
-          // axios
-          //   .post("/api/pacientes/dar-alta", {
-          //     id: pacienteId,
-          //   })
-          //   .then((res) => {
-          //     alertify.success(res.data.message);
-          //     this.obtenerDatos();
-          //   })
-          //   .catch((err) => {
-          //     alertify.error(err.response.data.message);
-          //   });
+         const url =  `http://localhost:5000/api/paciente-alta/${pacienteId}`
+            axios.put(url).then((res) => {
+              alertify.success(res.data.msg);
+              this.obtenerDatos();
+            }).catch((err) => {
+              alertify.error(err.response.data.msg);
+            });
         },
         () => {
           alertify.warning("Operación cancelada");
@@ -189,6 +185,8 @@ export default {
       this.getCantidadPacienteHospitalizados();
       this.getPacientesEnCola();
       this.getPacientesHospitalizados();
+      this.getCamasDisponibles()
+      this.asinarCamaPacientesEnCola()
     },
     async getCantidadPacienteHospitalizados() {
       let url = "http://localhost:5000/api/cantidad-pacientes-hospitalizados";
@@ -201,6 +199,41 @@ export default {
         alertify.error(
           "Error al obtener la cantidad de pacientes hospitalizados"
         );
+      }
+    },
+    async getCamasDisponibles(){
+       let url = "http://localhost:5000/api/cantidad-camas-disponibles";
+      try {
+        const {
+          data: { camasDisponibles },
+        } = await axios.get(url);
+        this.centidadCamasDisponibles = camasDisponibles;
+      } catch (error) {
+        alertify.error(
+          "Error al obtener la cantidad de camas disponibles"
+        );
+      }
+    },
+    async asinarCamaPacientesEnCola() {
+      if(this.pacientesEnCola >= 1 && this.centidadCamasDisponibles >= 1){
+        for (let index = 0; index < this.pacientesEnCola; index++) {
+          if(this.centidadCamasDisponibles !== 0 ){
+            let url = "http://localhost:5000/api/pacienteCola/asignar-cama";
+            try {
+              const {
+                data: { msg },
+              } = await axios.get(url);
+              alertify.success(msg)
+              await this.getPacientesEnCola()
+              await this.getCamasDisponibles()
+              await this.getPacientesHospitalizados()
+            } catch (error) {
+              alertify.error(
+                "Ocurió un error asginado automaticamente la cama del paciente en cola"
+              );
+            }
+          }
+        }
       }
     },
     async getPacientesEnCola() {

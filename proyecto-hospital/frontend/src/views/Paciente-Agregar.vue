@@ -10,7 +10,15 @@
                 Completa los datos solicitados para el registro del paciente. La
                 cama se asignada automaticamente en caso se encuentre
                 disponible. En caso no existan camas disponibles entrara en la
-                cola
+                cola <br>
+                <i class="fas fa-warning"></i>
+                Solo hay disponibles 50 camas para los pacientes <br>
+                <template v-if="cantidadCamasDisponibles <= 0">
+                <i class="fas fa-times"></i> <strong> Actualmente no hay camas disponibles</strong>
+                </template>
+                <template v-else>
+                <i class="fas fa-bell"></i> Actualmente cuentas con: <strong>{{cantidadCamasDisponibles}}</strong>
+                </template>
               </p>
               <div class="grey-text">
                 <h4 class="text-left text-dark mt-5">
@@ -415,6 +423,7 @@ export default {
   },
   data() {
     return {
+      cantidadCamasDisponibles:[],
       deshabilitado: false,
       historiaMedica: false,
       paciente: {
@@ -443,7 +452,23 @@ export default {
       fumador: "",
     };
   },
+  mounted(){
+    this.obtenerCamasDisponibles()
+  },
   methods: {
+    async obtenerCamasDisponibles(){
+       let url = "http://localhost:5000/api/cantidad-camas-disponibles";
+      try {
+        const {
+          data: { camasDisponibles },
+        } = await axios.get(url);
+        this.cantidadCamasDisponibles = camasDisponibles;
+      } catch (error) {
+        alertify.error(
+          "Error al obtener la cantidad de camas disponibles"
+        );
+      }
+    },
     limpiarCampos() {
       this.tomaCafe = "";
       this.alcoholico = "";
@@ -549,7 +574,7 @@ export default {
         })
         .catch((error) => {
           this.deshabilitado = false;
-          alertify.error("Error al registrar paciente" + error);
+          alertify.error("Error al registrar paciente. Recuerde que los números personales & Familiar son unicos" + error);
         });
     },
   },

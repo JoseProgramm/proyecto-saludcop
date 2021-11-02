@@ -101,7 +101,8 @@
               </div>
               <div v-else>
                 <h4 class="text-muted text-center">
-                  No hay pacientes dados de alta <i class="fas fa-file-medical-alt"></i>
+                  No hay pacientes dados de alta
+                  <i class="fas fa-file-medical-alt"></i>
                 </h4>
               </div>
             </div>
@@ -159,10 +160,19 @@ export default {
           "Eliminar paciente",
           "¿Está seguro que desea eliminar el paciente?",
           () => {
-            alertify.success("Funcionalidad en desarrollo...");
+            const url = `http://localhost:5000/api/paciente-eliminar/${pacienteId}`;
+            axios
+              .delete(url)
+              .then((res) => {
+                alertify.success(res.data.msg);
+                alertify.success("Funcionalidad en desarrollo...");
+                this.getPacientesAlta();
+              })
+              .catch((e) => {
+                alertify.error(e.response.data.msg);
+              });
           },
-          () => {
-          }
+          () => {}
         )
         .set("labels", { ok: "Si!", cancel: "Cancelar" });
     },
@@ -172,7 +182,7 @@ export default {
         const {
           data: { pacientesEnAlta },
         } = await axios.get(url);
-        this.pacienteAlta = pacientesEnAlta
+        this.pacienteAlta = pacientesEnAlta;
       } catch (error) {
         alertify.error(
           "Ocurrió un error obteniendo los pacientes dados de alta"
@@ -208,7 +218,7 @@ input[type="text"] {
 input[type="text"]:focus {
   width: 30%;
 }
-@media only screen and (max-width: 700px),
+@media only screen and (max-width: 930px),
   (min-device-width: 768px) and (max-device-width: 1024px) {
   table,
   thead,
