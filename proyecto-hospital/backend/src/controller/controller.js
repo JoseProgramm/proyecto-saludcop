@@ -1,5 +1,7 @@
 const Pacientes = require('../models/Pacientes');
 const Camas = require('../models/Camas');
+const Usuarios = require('../models/Usuarios');
+const bcrypt = require('bcrypt');
 const {
   pacientesDadoAlta,
   pacientesEnCola,
@@ -388,6 +390,133 @@ exports.cantidadCamasDisponibles = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       msg: 'Ocurrió un error obteniendo las camas disponibles ' + error.message,
+    });
+  }
+};
+exports.registroUsuarioController = async (req, res) => {
+  const { nombre, usuario, clave } = req.body;
+  if (!nombre || !usuario || !clave) {
+    return res
+      .status(200)
+      .json({ msg: 'Todos los datos son necesarios para el registro' });
+  }
+  const usuarioObtenido = await Usuarios.findAll({
+    where: {
+      usuario,
+    },
+  });
+  if (usuarioObtenido.length > 0) {
+    return res.status(200).json({
+      msg: 'El usuario ya existe',
+    });
+  }
+  try {
+    const claveHash = await bcrypt.hash(clave, 10);
+    const usuarioRegistrado = await Usuarios.create({
+      nombre,
+      usuario,
+      clave: claveHash,
+    });
+    if (usuarioRegistrado) {
+      return res.status(200).json({
+        msg: 'Usuario registrado correctamente',
+        usuarioRegistrado,
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      msg: 'Ocurrió un error registrando el usuario. ' + error.message,
+    });
+  }
+};
+exports.loginUsuarioController = async (req, res) => {
+  const { usuario, clave } = req.body;
+  if (!usuario || !clave) {
+    return res
+      .status(200)
+      .json({ msg: 'Todos los datos son necesarios para el registro' });
+  }
+  const usuarioObtenido = await Usuarios.findAll({
+    where: {
+      usuario,
+    },
+  });
+  if (!usuarioObtenido.length) {
+    return res.status(200).json({
+      msg: 'El usuario no existe',
+    });
+  }
+  try {
+    const usuarioValido = await bcrypt.compare(clave, usuarioObtenido[0].clave);
+    if (usuarioValido) {
+      return res.status(200).json({
+        msg: 'Usuario autenticado correctamente',
+        usuarioObtenido,
+      });
+    } else {
+      return res.status(200).json({
+        msg: 'La clave no es correcta',
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      msg: 'Ocurrió un error autenticando el usuario. ' + error.message,
+    });
+  }
+};
+exports.obtenerUsuarios = async (req, res) => {
+  try {
+    const usuarios = await Usuarios.findAll();
+    res.status(200).json({
+      usuarios,
+      msg: 'Usuarios disponibles',
+    });
+  } catch (error) {
+    return res.status(500).json({
+      msg: 'Ocurrió un error obteniendo los usuarios. ' + error.message,
+    });
+  }
+};
+exports.obtenerRolUsuario = async (req, res) => {
+  const { usuarioId } = req.params;
+  try {
+    const usuarioObtenido = await Usuarios.findAll({
+      where: {
+        id: usuarioId,
+      },
+    });
+    if (usuarioObtenido[0].admin) {
+      res.status(200).json({
+        rol: true,
+      });
+    } else {
+      res.status(200).json({
+        rol: false,
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      msg: 'Ocurrió un error obteniendo el rol del usuarios. ' + error.message,
+    });
+  }
+};
+exports.eliminarUsuarioController = async (req, res) => {
+  try {
+    const fueEliminado = await Usuarios.destroy({
+      where: {
+        id: req.params.usuarioId,
+      },
+    });
+    return fueEliminado
+      ? res.status(200).json({
+          msg: 'Usuario eliminado correctamente.',
+        })
+      : res.status(404).json({
+          msg: 'No se pudo eliminar el usuario, compruebe que el id pertenezca a un usuario registrado e intente nuevamente.',
+        });
+  } catch (error) {
+    return res.status(500).json({
+      msg: 'Ocurrió un error eliminando el paciente. ' + error.message,
     });
   }
 };
