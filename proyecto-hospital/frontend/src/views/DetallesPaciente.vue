@@ -401,14 +401,20 @@
               v-if="!paciente.dado_alta && !paciente.id_cama"
             >
               <mdb-btn
-                :disabled="cargando"
+                :disabled="cargando || centidadCamasDisponibles === 0"
                 color="primary"
                 dark-waves
                 :icon="cargando ? 'circle-notch' : 'procedures'"
                 :icon-class="[{ 'fa-spin': cargando }]"
                 type="button"
-                @click="asignarCama"
-                >Asignar cama</mdb-btn
+                title="Asigna cama al paciente en cola"
+                @click="asinarCamaPacientesEnCola"
+                >Asignar cama a pacientes en cola</mdb-btn
+              >
+              <span
+                v-if="centidadCamasDisponibles === 0"
+                class="text-center text-muted d-block mt-2"
+                >Actualmente no hay camas disponibles</span
               >
             </div>
           </mdb-card-body>
@@ -438,12 +444,74 @@ export default {
       alcoholico: "",
       fumador: "",
       cargando: true,
+      centidadCamasDisponibles: null,
+      pacientesEnCola: null,
     };
   },
   mounted() {
     this.obtenerPaciente();
+    this.getPacientesEnCola();
+    this.getCamasDisponibles();
   },
   methods: {
+    async getPacientesEnCola() {
+      let url = "http://localhost:5000/api/cantidad-pacientes-en-cola";
+      try {
+        const {
+          data: { cantidadPacienteCola },
+        } = await axios.get(url, {
+          headers: {
+            autenticacion: `${localStorage.getItem("admin-login")}`,
+          },
+        });
+        this.pacientesEnCola = cantidadPacienteCola;
+      } catch (error) {
+        alertify.error("Error al obtener la cantidad de pacientes en cola");
+      }
+    },
+    async getCamasDisponibles() {
+      let url = "http://localhost:5000/api/cantidad-camas-disponibles";
+      try {
+        const {
+          data: { camasDisponibles },
+        } = await axios.get(url, {
+          headers: {
+            autenticacion: `${localStorage.getItem("admin-login")}`,
+          },
+        });
+        this.centidadCamasDisponibles = camasDisponibles;
+      } catch (error) {
+        alertify.error("Error al obtener la cantidad de camas disponibles");
+      }
+    },
+    async asinarCamaPacientesEnCola() {
+      if (this.pacientesEnCola >= 1 && this.centidadCamasDisponibles >= 1) {
+        for (let index = 0; index < this.pacientesEnCola; index++) {
+          if (this.centidadCamasDisponibles !== 0) {
+            let url = "http://localhost:5000/api/pacienteCola/asignar-cama";
+            try {
+              const {
+                data: { msg },
+              } = await axios.get(url, {
+                headers: {
+                  autenticacion: `${localStorage.getItem("admin-login")}`,
+                },
+              });
+              alertify.success(msg);
+              await this.getPacientesEnCola();
+              await this.getCamasDisponibles();
+              setTimeout(() => {
+                this.$router.push("/");
+              }, 2000);
+            } catch (error) {
+              alertify.error(
+                "Ocurió un error asginado automaticamente la cama del paciente en cola"
+              );
+            }
+          }
+        }
+      }
+    },
     pacienteDarAlta(pacienteId) {
       alertify.set("notifier", "position", "top-right");
       alertify
@@ -451,30 +519,24 @@ export default {
           "Dar de alta paciente",
           "¿Está seguro que desea dar de alta al paciente?",
           () => {
-            const url =  `http://localhost:5000/api/paciente-alta/${pacienteId}`
-            axios.put(url).then((res) => {
-              alertify.success(res.data.msg);
-              this.obtenerPaciente();
-            }).catch((err) => {
-              alertify.error(err.response.data.msg);
-            });
+            const url = `http://localhost:5000/api/paciente-alta/${pacienteId}`;
+            axios({
+              url,
+              method: "PUT",
+              headers: {
+                autenticacion: `${localStorage.getItem("admin-login")}`,
+              },
+            })
+              .then((res) => {
+                alertify.success(res.data.msg);
+                this.obtenerPaciente();
+                this.asinarCamaPacientesEnCola();
+              })
+              .catch((err) => {
+                alertify.error(err.response.data.msg);
+              });
           },
-          () => {
-          }
-        )
-        .set("labels", { ok: "Si!", cancel: "Cancelar" });
-    },
-    asignarCama(pacienteId) {
-      alertify.set("notifier", "position", "top-right");
-      alertify
-        .confirm(
-          "Asignar cama",
-          "¿Desea asignar cama al paciente?",
-          () => {
-            alertify.success("Funcionalidad en desarrollo,  la cama se asignara por orden en la cola...");
-          },
-          () => {
-          }
+          () => {}
         )
         .set("labels", { ok: "Si!", cancel: "Cancelar" });
     },
@@ -484,7 +546,11 @@ export default {
         const url = `http://localhost:5000/api/paciente/${this.$route.params.pacienteID}`;
         const {
           data: { paciente },
-        } = await axios.get(url);
+        } = await axios.get(url, {
+          headers: {
+            autenticacion: `${localStorage.getItem("admin-login")}`,
+          },
+        });
         if (!paciente.length) {
           alertify.error("El paciente no existe");
           setTimeout(() => {

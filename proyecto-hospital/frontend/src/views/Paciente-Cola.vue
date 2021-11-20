@@ -125,7 +125,7 @@ export default {
     };
   },
   mounted() {
-    this.getPacientesAlta();
+    this.getPacientesCola();
   },
   computed: {
     pacientesAltaFiltrados() {
@@ -152,12 +152,16 @@ export default {
     formatearFecha(fecha) {
       return new Date(fecha).toLocaleDateString();
     },
-    async getPacientesAlta() {
+    async getPacientesCola() {
       try {
         const url = "http://localhost:5000/api/pacientes-en-cola";
         const {
           data: { pacientesCola },
-        } = await axios.get(url);
+        } = await axios.get(url, {
+          headers: {
+            autenticacion: `${localStorage.getItem("admin-login")}`,
+          },
+        });
         this.pacientesEnCola = pacientesCola;
       } catch (error) {
         alertify.error("Ocurrió un error obteniendo los pacientes en cola");

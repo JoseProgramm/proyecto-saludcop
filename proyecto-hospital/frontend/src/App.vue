@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Navbar class="width" v-if="!ocultarNavbarEnLoginORegistro" />
+    <Navbar class="width" v-if="estaLogueado" />
     <transition name="animacion" mode="out-in">
       <router-view />
     </transition>
@@ -15,15 +15,9 @@ export default {
     Navbar,
   },
   computed: {
-    ocultarNavbarEnLoginORegistro() {
-      return (
-        window.location.pathname === "/registro" ||
-        window.location.pathname === "/login"
-      );
+    estaLogueado() {
+    return window.localStorage.getItem("admin-login");
     },
-    // estaLogueado() {
-    // return window.localStorage.getItem("admin-login");
-    // },
   },
 };
 </script>

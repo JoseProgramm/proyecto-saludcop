@@ -162,10 +162,13 @@ export default {
           () => {
             const url = `http://localhost:5000/api/paciente-eliminar/${pacienteId}`;
             axios
-              .delete(url)
+              .delete(url, {
+                headers: {
+                  autenticacion: `${localStorage.getItem("admin-login")}`,
+                },
+              })
               .then((res) => {
                 alertify.success(res.data.msg);
-                alertify.success("Funcionalidad en desarrollo...");
                 this.getPacientesAlta();
               })
               .catch((e) => {
@@ -181,7 +184,11 @@ export default {
         const url = "http://localhost:5000/api/pacientes-en-alta";
         const {
           data: { pacientesEnAlta },
-        } = await axios.get(url);
+        } = await axios.get(url, {
+          headers: {
+            autenticacion: `${localStorage.getItem("admin-login")}`,
+          },
+        });
         this.pacienteAlta = pacientesEnAlta;
       } catch (error) {
         alertify.error(

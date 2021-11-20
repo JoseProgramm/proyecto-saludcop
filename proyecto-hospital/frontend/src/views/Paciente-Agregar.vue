@@ -10,14 +10,19 @@
                 Completa los datos solicitados para el registro del paciente. La
                 cama se asignada automaticamente en caso se encuentre
                 disponible. En caso no existan camas disponibles entrara en la
-                cola <br>
+                cola <br />
                 <i class="fas fa-warning"></i>
-                Solo hay disponibles 50 camas para los pacientes <br>
+                Solo hay disponibles 50 camas para los pacientes <br />
                 <template v-if="cantidadCamasDisponibles <= 0">
-                <i class="fas fa-times"></i> <strong> Actualmente no hay camas disponibles</strong>
+                  <i class="fas fa-times"></i>
+                  <strong>
+                    Actualmente no hay camas disponibles, entrara en
+                    cola</strong
+                  >
                 </template>
                 <template v-else>
-                <i class="fas fa-bell"></i> Actualmente cuentas con: <strong>{{cantidadCamasDisponibles}}</strong>
+                  <i class="fas fa-bell"></i> Actualmente cuentas con:
+                  <strong>{{ cantidadCamasDisponibles }}</strong>
                 </template>
               </p>
               <div class="grey-text">
@@ -423,7 +428,7 @@ export default {
   },
   data() {
     return {
-      cantidadCamasDisponibles:[],
+      cantidadCamasDisponibles: [],
       deshabilitado: false,
       historiaMedica: false,
       paciente: {
@@ -452,21 +457,23 @@ export default {
       fumador: "",
     };
   },
-  mounted(){
-    this.obtenerCamasDisponibles()
+  mounted() {
+    this.obtenerCamasDisponibles();
   },
   methods: {
-    async obtenerCamasDisponibles(){
-       let url = "http://localhost:5000/api/cantidad-camas-disponibles";
+    async obtenerCamasDisponibles() {
+      let url = "http://localhost:5000/api/cantidad-camas-disponibles";
       try {
         const {
           data: { camasDisponibles },
-        } = await axios.get(url);
+        } = await axios.get(url, {
+          headers: {
+            autenticacion: `${localStorage.getItem("admin-login")}`,
+          },
+        });
         this.cantidadCamasDisponibles = camasDisponibles;
       } catch (error) {
-        alertify.error(
-          "Error al obtener la cantidad de camas disponibles"
-        );
+        alertify.error("Error al obtener la cantidad de camas disponibles");
       }
     },
     limpiarCampos() {
@@ -555,16 +562,22 @@ export default {
       let url = "http://localhost:5000/api/paciente-registro";
       event.target.classList.add("was-validated");
       axios
-        .post(url, paciente)
+        .post(url, paciente, {
+          headers: {
+            autenticacion: `${localStorage.getItem("admin-login")}`,
+          },
+        })
         .then((response) => {
           alertify.set("notifier", "position", "top-right");
           alertify.success("Paciente registrado con exito");
-          if(response.data.id_cama){
+          if (response.data.id_cama) {
             alertify.success(
               "El número de cama asignado es " + response.data.id_cama
             );
-          }else{
-             alertify.warning('El paciente no tiene cama asignada, se ha agregado a la cola.'); 
+          } else {
+            alertify.warning(
+              "El paciente no tiene cama asignada, se ha agregado a la cola."
+            );
           }
           this.deshabilitado = false;
           this.limpiarCampos();
@@ -574,7 +587,10 @@ export default {
         })
         .catch((error) => {
           this.deshabilitado = false;
-          alertify.error("Error al registrar paciente. Recuerde que los números personales & Familiar son unicos" + error);
+          alertify.error(
+            "Error al registrar paciente. Recuerde que los números personales & Familiar son unicos" +
+              error
+          );
         });
     },
   },

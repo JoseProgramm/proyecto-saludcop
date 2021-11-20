@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost:3306
--- Tiempo de generación: 14-11-2021 a las 16:15:28
+-- Tiempo de generación: 20-11-2021 a las 15:55:54
 -- Versión de PHP: 7.4.3
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -180,7 +180,8 @@ CREATE TABLE `usuarios` (
 INSERT INTO `usuarios` (`id`, `nombre`, `usuario`, `clave`, `admin`, `fecha_creacion`) VALUES
 (1, 'Administrador', 'admin@email.com', '$2b$10$6viOVzliez1ZjgTwBoFQd.t17YKYAG3jawPySve./HbxO.r8kGcFC', 1, '2021-11-13 22:12:14'),
 (2, 'Julio', 'julio@email.com', '$2b$10$kkub5pOz4Y2S/A.y4l/MWO5Bg5uF7W.aa4qMivj/aQnPPAMDVsaaa', 0, '2021-11-13 22:12:14'),
-(5, 'Jose', 'jose@saludcop.com', '$2b$10$6f9HjdWOr5GxM37fNKnxH.4R9A1CGYc7/6dKaOf4oUkWONo6YjXZ.', 0, '2021-11-13 23:17:37');
+(5, 'Jose', 'jose@saludcop.com', '$2b$10$6f9HjdWOr5GxM37fNKnxH.4R9A1CGYc7/6dKaOf4oUkWONo6YjXZ.', 0, '2021-11-13 23:17:37'),
+(7, 'Victor', 'victor@saludcop.com', '$2b$10$WzDpIJnlWiYotEOWDBorhOyZXwmeKdWQ4thIh7VEGcMNO/dwUGebe', 0, '2021-11-20 19:39:52');
 
 --
 -- Índices para tablas volcadas
@@ -227,7 +228,7 @@ ALTER TABLE `pacientes`
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- Restricciones para tablas volcadas

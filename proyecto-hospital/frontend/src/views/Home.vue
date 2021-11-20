@@ -6,7 +6,7 @@
         <div class="container mb-2">
           <div class="row justify-content-between responsive">
             <mdb-btn
-            @click="obtenerDatos"
+              @click="obtenerDatos"
               flat
               dark-waves
               icon="redo-alt"
@@ -19,7 +19,7 @@
             >
               Actualizar
             </mdb-btn>
-            <div class="badge-contenedor" >
+            <div class="badge-contenedor">
               <mdb-badge pill color="success" class="p-3 mt-2">
                 <span>Pacientes en cama <i class="fas fa-procedures"></i></span>
                 <mdb-badge pill color="danger" class="ml-2">{{
@@ -36,10 +36,10 @@
           </div>
         </div>
         <div class="container mt-4" v-if="pacientesHospitalizados.length">
-          <div class=" justify-content-center row ">
+          <div class="justify-content-center row">
             <mdb-input
-            class="max"
-            icon="search"
+              class="max"
+              icon="search"
               type="text"
               label="Buscar pacientes (Nombre, Apellido, Edad, Sexo, Enfermedad o Cama)"
               outline
@@ -91,18 +91,32 @@
                         <div class="card-body text-center mt-4">
                           <h4 class="card-title">Motivo & Obseración</h4>
                           <p class="card-text">
-                            Motivo de consulta: <strong>{{paciente.motivo.substring(0,50)}}...</strong>
+                            Motivo de consulta:
+                            <strong
+                              >{{ paciente.motivo.substring(0, 50) }}...</strong
+                            >
                             <br />
-                            Observaciones: <strong>{{paciente.observacion.substring(0,50)}}...</strong>
+                            Observaciones:
+                            <strong
+                              >{{
+                                paciente.observacion.substring(0, 50)
+                              }}...</strong
+                            >
                           </p>
                           <ul class="list-inline">
                             <li class="list-inline-item">
-                              <a class="text-xs-center" @click="detallesPaciente(paciente.id)">
+                              <a
+                                class="text-xs-center"
+                                @click="detallesPaciente(paciente.id)"
+                              >
                                 Ir a detalles <i class="fa fa-arrow-right"></i>
                               </a>
                             </li>
                             <li class="list-inline-item">
-                              <a class="text-xs-center" @click="pacienteDarAlta(paciente.id)">
+                              <a
+                                class="text-xs-center"
+                                @click="pacienteDarAlta(paciente.id)"
+                              >
                                 Dar de alta <i class="fa fa-check"></i>
                               </a>
                             </li>
@@ -117,7 +131,10 @@
           </div>
         </div>
         <div v-else class="container my-5">
-            <h4 class="text-center text-muted">No existen pacientes registrados <i class="fas fa-laptop-medical"></i> </h4>
+          <h4 class="text-center text-muted">
+            No existen pacientes registrados
+            <i class="fas fa-laptop-medical"></i>
+          </h4>
         </div>
       </div>
     </section>
@@ -133,14 +150,14 @@ export default {
   components: {
     mdbBadge,
     mdbBtn,
-    mdbInput
+    mdbInput,
   },
   data() {
     return {
       buscador: "",
       pacientesHospitalizados: [],
       cantidadPacientesCama: null,
-      centidadCamasDisponibles:null,
+      centidadCamasDisponibles: null,
       pacientesEnCola: null,
     };
   },
@@ -159,41 +176,58 @@ export default {
     },
   },
   methods: {
-    pacienteDarAlta(pacienteId){
-      alertify.set('notifier','position', 'top-right');
-      alertify.confirm(
-        "Dar de alta paciente",
-        "¿Está seguro que desea dar de alta al paciente?",
-        () => {
-         const url =  `http://localhost:5000/api/paciente-alta/${pacienteId}`
-            axios.put(url).then((res) => {
-              alertify.success(res.data.msg);
-              this.obtenerDatos();
-            }).catch((err) => {
-              alertify.error(err.response.data.msg);
-            });
-        },
-        () => {
-          alertify.warning("Operación cancelada");
-        }
-      ).set('labels', {ok:'Si!', cancel:'Cancelar'}); 
+    pacienteDarAlta(pacienteId) {
+      alertify.set("notifier", "position", "top-right");
+      alertify
+        .confirm(
+          "Dar de alta paciente",
+          "¿Está seguro que desea dar de alta al paciente?",
+          () => {
+            const url = `http://localhost:5000/api/paciente-alta/${pacienteId}`;
+            axios({
+              url,
+              method: "PUT",
+              headers: {
+                autenticacion: `${localStorage.getItem("admin-login")}`,
+              },
+            })
+              .then((res) => {
+                alertify.success(res.data.msg);
+                this.getCamasDisponibles();
+                setTimeout(() => {
+                  this.obtenerDatos();
+                }, 100);
+              })
+              .catch((err) => {
+                alertify.error(err.response.data.msg);
+              });
+          },
+          () => {
+            alertify.warning("Operación cancelada");
+          }
+        )
+        .set("labels", { ok: "Si!", cancel: "Cancelar" });
     },
-    detallesPaciente(pacienteID){
-      this.$router.push({ name: "DetallesPaciente", params: { pacienteID} });
+    detallesPaciente(pacienteID) {
+      this.$router.push({ name: "DetallesPaciente", params: { pacienteID } });
     },
     obtenerDatos() {
       this.getCantidadPacienteHospitalizados();
       this.getPacientesEnCola();
       this.getPacientesHospitalizados();
-      this.getCamasDisponibles()
-      this.asinarCamaPacientesEnCola()
+      this.getCamasDisponibles();
+      this.asinarCamaPacientesEnCola();
     },
     async getCantidadPacienteHospitalizados() {
       let url = "http://localhost:5000/api/cantidad-pacientes-hospitalizados";
       try {
         const {
           data: { cantidadPacientesHospitalizados },
-        } = await axios.get(url);
+        } = await axios.get(url, {
+          headers: {
+            autenticacion: `${localStorage.getItem("admin-login")}`,
+          },
+        });
         this.cantidadPacientesCama = cantidadPacientesHospitalizados;
       } catch (error) {
         alertify.error(
@@ -201,32 +235,38 @@ export default {
         );
       }
     },
-    async getCamasDisponibles(){
-       let url = "http://localhost:5000/api/cantidad-camas-disponibles";
+    async getCamasDisponibles() {
+      let url = "http://localhost:5000/api/cantidad-camas-disponibles";
       try {
         const {
           data: { camasDisponibles },
-        } = await axios.get(url);
+        } = await axios.get(url, {
+          headers: {
+            autenticacion: `${localStorage.getItem("admin-login")}`,
+          },
+        });
         this.centidadCamasDisponibles = camasDisponibles;
       } catch (error) {
-        alertify.error(
-          "Error al obtener la cantidad de camas disponibles"
-        );
+        alertify.error("Error al obtener la cantidad de camas disponibles");
       }
     },
     async asinarCamaPacientesEnCola() {
-      if(this.pacientesEnCola >= 1 && this.centidadCamasDisponibles >= 1){
+      if (this.pacientesEnCola >= 1 && this.centidadCamasDisponibles >= 1) {
         for (let index = 0; index < this.pacientesEnCola; index++) {
-          if(this.centidadCamasDisponibles !== 0 ){
+          if (this.centidadCamasDisponibles !== 0) {
             let url = "http://localhost:5000/api/pacienteCola/asignar-cama";
             try {
               const {
                 data: { msg },
-              } = await axios.get(url);
-              alertify.success(msg)
-              await this.getPacientesEnCola()
-              await this.getCamasDisponibles()
-              await this.getPacientesHospitalizados()
+              } = await axios.get(url, {
+                headers: {
+                  autenticacion: `${localStorage.getItem("admin-login")}`,
+                },
+              });
+              alertify.success(msg);
+              await this.getPacientesEnCola();
+              await this.getCamasDisponibles();
+              await this.getPacientesHospitalizados();
             } catch (error) {
               alertify.error(
                 "Ocurió un error asginado automaticamente la cama del paciente en cola"
@@ -241,7 +281,11 @@ export default {
       try {
         const {
           data: { cantidadPacienteCola },
-        } = await axios.get(url);
+        } = await axios.get(url, {
+          headers: {
+            autenticacion: `${localStorage.getItem("admin-login")}`,
+          },
+        });
         this.pacientesEnCola = cantidadPacienteCola;
       } catch (error) {
         alertify.error("Error al obtener la cantidad de pacientes en cola");
@@ -252,8 +296,12 @@ export default {
       try {
         const {
           data: { pacientesHospital },
-        } = await axios.get(url);
-        this.pacientesHospitalizados = pacientesHospital
+        } = await axios.get(url, {
+          headers: {
+            autenticacion: `${localStorage.getItem("admin-login")}`,
+          },
+        });
+        this.pacientesHospitalizados = pacientesHospital;
       } catch (error) {
         alertify.error("Error al obtener los pacientes hospitalizados");
       }
@@ -265,7 +313,7 @@ export default {
 };
 </script>
 <style scoped>
-.max{
+.max {
   width: 36em !important;
 }
 
