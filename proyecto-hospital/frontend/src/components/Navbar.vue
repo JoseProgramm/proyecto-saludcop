@@ -90,7 +90,10 @@ export default {
   methods: {
     logout() {
       localStorage.removeItem("admin-login");
-      window.location.href = "/login";
+      this.$router.push("/login");
+      setTimeout(() => {
+        window.location.reload();
+      }, 5);
     },
   },
 };
